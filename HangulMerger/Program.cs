@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -53,7 +54,7 @@ namespace ConsoleApp2
 
         public static void InitHanCharDic()
         {
-            for ( int i = 0; i < CHOSUNG_ARR.Length; i++ )
+            for (int i = 0; i < CHOSUNG_ARR.Length; i++)
             {
                 char ch = CHOSUNG_ARR[i];
                 HanChar hanChar = new HanChar();
@@ -73,14 +74,14 @@ namespace ConsoleApp2
                 HanCharDic.Add(ch, hanChar);
             }
 
-            for ( int i = 1; i < JONGSUNG_ARR.Length; i++ )
+            for (int i = 1; i < JONGSUNG_ARR.Length; i++)
             {
                 char ch = JONGSUNG_ARR[i];
                 HanChar hanChar = HanCharDic.ContainsKey(ch) ? HanCharDic[ch] : new HanChar();
                 hanChar.ch = ch;
                 hanChar.isJongsung = true;
                 hanChar.jongsungIndex = i;
-                if ( !HanCharDic.ContainsKey(ch) )
+                if (!HanCharDic.ContainsKey(ch))
                     HanCharDic.Add(ch, hanChar);
             }
 
@@ -117,7 +118,7 @@ namespace ConsoleApp2
 
         enum ParseStatus
         {
-            NORMAL, 
+            NORMAL,
             CHO_FOUND,
             JUNG_FOUND,
             JONG_CHO_FOUND,
@@ -143,7 +144,7 @@ namespace ConsoleApp2
                     switch (status)
                     {
                         case ParseStatus.NORMAL:
-                            if ( hanChar.isChosung )
+                            if (hanChar.isChosung)
                             {
                                 buffer[0] = hanChar;
                                 status = ParseStatus.CHO_FOUND;
@@ -154,7 +155,7 @@ namespace ConsoleApp2
                             }
                             break;
                         case ParseStatus.CHO_FOUND:
-                            if ( hanChar.isJungsung )
+                            if (hanChar.isJungsung)
                             {
                                 buffer[1] = hanChar;
                                 status = ParseStatus.JUNG_FOUND;
@@ -167,13 +168,13 @@ namespace ConsoleApp2
                             }
                             break;
                         case ParseStatus.JUNG_FOUND:
-                            if ( !hanChar.isChosung && hanChar.isJongsung )
+                            if (!hanChar.isChosung && hanChar.isJongsung)
                             {
                                 buffer[2] = hanChar;
                                 result.Append(MergeChar(buffer));
                                 status = ParseStatus.NORMAL;
                             }
-                            else if ( hanChar.isChosung && hanChar.isJongsung )
+                            else if (hanChar.isChosung && hanChar.isJongsung)
                             {
                                 buffer[2] = hanChar;
                                 status = ParseStatus.JONG_CHO_FOUND;
@@ -186,7 +187,7 @@ namespace ConsoleApp2
                             }
                             break;
                         case ParseStatus.JONG_CHO_FOUND:
-                            if ( hanChar.isJungsung )
+                            if (hanChar.isJungsung)
                             {
                                 HanChar next_chosung = buffer[2];
                                 buffer[2] = null;
@@ -209,7 +210,7 @@ namespace ConsoleApp2
                 } while (restart);
             }
 
-            if ( buffer[0] != null )
+            if (buffer[0] != null)
             {
                 result.Append(MergeChar(buffer));
             }
@@ -221,7 +222,7 @@ namespace ConsoleApp2
         {
             char merged = ' ';
 
-            if ( buffer[1] == null )
+            if (buffer[1] == null)
             {
                 merged = buffer[0].ch;
             }
@@ -231,7 +232,7 @@ namespace ConsoleApp2
                 int jungIndex = buffer[1].jungsungIndex;
                 int jongIndex = buffer[2] != null ? buffer[2].jongsungIndex : 0;
 
-                int value = 0xAC00 + 
+                int value = 0xAC00 +
                     choIndex * JUNGSUNG_ARR.Length * JONGSUNG_ARR.Length +
                     jungIndex * JONGSUNG_ARR.Length +
                     jongIndex;
@@ -245,13 +246,13 @@ namespace ConsoleApp2
         public static void ListDirectory(String dir, Func<bool, String, String> onFile)
         {
             String[] files = Directory.GetFiles(dir);
-            foreach ( String file in files )
+            foreach (String file in files)
             {
                 onFile.Invoke(false, file);
             }
 
             String[] dirs = Directory.GetDirectories(dir);
-            foreach ( String d in dirs )
+            foreach (String d in dirs)
             {
                 String rd = onFile.Invoke(true, d);
                 ListDirectory(rd, onFile);
@@ -278,11 +279,11 @@ namespace ConsoleApp2
             String dir = Path.GetDirectoryName(path);
             String newFile = MergeHangul(file);
 
-            if ( file != newFile )
+            if (file != newFile)
             {
                 Console.WriteLine($"{dir}: {file} -> {newFile}");
                 String newPath = Path.Combine(dir, newFile);
-                if ( isDir )
+                if (isDir)
                 {
                     Directory.Move(path, newPath);
                 }
@@ -298,11 +299,89 @@ namespace ConsoleApp2
             }
         }
 
-        static void Main(string[] args)
+        private static void Usage()
         {
-            InitHanCharDic();
-            ListDirectory("D:\\Mac", MergeHangulFile);
-            //TestMerge();
+            string filename = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+            Console.Error.WriteLine($"{filename} path [ path ... ]");
+            Console.Error.WriteLine();
         }
+
+        static void Main(String[] args)
+        {
+            String dir = @"D:\Mac\pictures\출사";
+            int[] count = new int[2];
+
+            Console.WriteLine("Counting....");
+
+            ListDirectory(dir, (isDir, path) => {
+                count[0] += isDir ? 0 : 1;
+                return path;
+            });
+
+            Console.WriteLine($"Total: ${count[0]}");
+
+            ListDirectory(dir, (isDir, path) => {
+                if (!isDir)
+                {
+                    count[1]++;
+                    double progress = (double)count[1] / count[0] * 100;
+                    Console.WriteLine($"{GetMD5Hash(path)} {path} {progress}");
+                }
+                return path;
+            });
+        }
+
+        static string GetMD5Hash(String file)
+        {
+            using (Stream fs = new BufferedStream(new FileStream(file, FileMode.Open, FileAccess.Read), 10 * 1024 * 1024))
+            {
+                return HexEncode(MD5.Create().ComputeHash(fs));
+            }
+        }
+
+        static string HexEncode(byte[] data)
+        {
+            StringBuilder sBuilder = new StringBuilder();
+            foreach (byte b in data)
+                sBuilder.Append(b.ToString("x2"));
+            return sBuilder.ToString();
+        }
+
+        static void Main_HangulMerge(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Usage();
+                return;
+            }
+
+            InitHanCharDic();
+
+            foreach (string path in args)
+            {
+                try
+                {
+                    if (Directory.Exists(path))
+                    {
+                        ListDirectory(path, MergeHangulFile);
+                    }
+                    else if (File.Exists(path))
+                    {
+                        MergeHangulFile(false, path);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"'{path}' is neither file nor directory.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+
+            Console.WriteLine(".");
+        }
+
     }
 }
