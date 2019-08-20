@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FileUtils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -243,22 +244,6 @@ namespace ConsoleApp2
             return merged;
         }
 
-        public static void ListDirectory(String dir, Func<bool, String, String> onFile)
-        {
-            String[] files = Directory.GetFiles(dir);
-            foreach (String file in files)
-            {
-                onFile.Invoke(false, file);
-            }
-
-            String[] dirs = Directory.GetDirectories(dir);
-            foreach (String d in dirs)
-            {
-                String rd = onFile.Invoke(true, d);
-                ListDirectory(rd, onFile);
-            }
-        }
-
         static void TestMerge()
         {
             foreach (KeyValuePair<char, HanChar> pair in HanCharDic)
@@ -306,47 +291,6 @@ namespace ConsoleApp2
             Console.Error.WriteLine();
         }
 
-        static void Main(String[] args)
-        {
-            String dir = @"D:\Mac\pictures\출사";
-            int[] count = new int[2];
-
-            Console.WriteLine("Counting....");
-
-            ListDirectory(dir, (isDir, path) => {
-                count[0] += isDir ? 0 : 1;
-                return path;
-            });
-
-            Console.WriteLine($"Total: ${count[0]}");
-
-            ListDirectory(dir, (isDir, path) => {
-                if (!isDir)
-                {
-                    count[1]++;
-                    double progress = (double)count[1] / count[0] * 100;
-                    Console.WriteLine($"{GetMD5Hash(path)} {path} {progress}");
-                }
-                return path;
-            });
-        }
-
-        static string GetMD5Hash(String file)
-        {
-            using (Stream fs = new BufferedStream(new FileStream(file, FileMode.Open, FileAccess.Read), 10 * 1024 * 1024))
-            {
-                return HexEncode(MD5.Create().ComputeHash(fs));
-            }
-        }
-
-        static string HexEncode(byte[] data)
-        {
-            StringBuilder sBuilder = new StringBuilder();
-            foreach (byte b in data)
-                sBuilder.Append(b.ToString("x2"));
-            return sBuilder.ToString();
-        }
-
         static void Main_HangulMerge(string[] args)
         {
             if (args.Length == 0)
@@ -363,7 +307,7 @@ namespace ConsoleApp2
                 {
                     if (Directory.Exists(path))
                     {
-                        ListDirectory(path, MergeHangulFile);
+                        FileUtil.ListDirectory(path, MergeHangulFile);
                     }
                     else if (File.Exists(path))
                     {
@@ -383,5 +327,9 @@ namespace ConsoleApp2
             Console.WriteLine(".");
         }
 
+        static void Main(string[] args)
+        {
+            Main_HangulMerge(new string[] { @"D:\Mac" });
+        }
     }
 }

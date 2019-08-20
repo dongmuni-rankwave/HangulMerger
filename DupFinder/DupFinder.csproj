@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AAB46755-9360-431E-ADE0-6FEA7E4E4427}</ProjectGuid>
+    <ProjectGuid>{9AE15E07-6F5B-485D-85BD-B7E1A2ABB33F}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>HangulMerger</RootNamespace>
-    <AssemblyName>HangulMerger</AssemblyName>
+    <RootNamespace>DupFinder</RootNamespace>
+    <AssemblyName>DupFinder</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -48,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="data.log" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileUtils\FileUtils.csproj">
