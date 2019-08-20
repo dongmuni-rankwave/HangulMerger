@@ -90,9 +90,21 @@ namespace DupFinder
         string log = @"C:\Users\dmlim\source\repos\HangulMerger\HangulMerger\bin\Release\hash2.log";
         Regex regex = new Regex(@"^(?<hash>[0-9a-f]{32}) (?<path>.+) [\d\.]+$");
 
+        void br()
+        {
+            Console.WriteLine("--------------------------------------------------------------------------------");
+        }
+
+        void PrintTitle(string message)
+        {
+            br();
+            Console.WriteLine(message);
+            br();
+        }
+
         void Run()
         {
-            Console.WriteLine("Checking Files...");
+            PrintTitle("Checking Files...");
 
             using (StreamReader reader = new StreamReader(log))
             {
@@ -118,22 +130,36 @@ namespace DupFinder
                 }
             }
 
-            Console.WriteLine("Counting Files...");
+            PrintTitle("Counting Files...");
 
             dirMap = dirs.Select(dir => new DirInfo(dir)).ToDictionary(di => di.Name, di => di);
 
-            foreach (DirInfo dirInfo in dirMap.Values)
+            foreach (DirInfo dirInfo in from dirInfo in dirMap.Values
+                orderby dirInfo.Files.Length
+                select dirInfo)
             {
-                //Console.WriteLine(dirInfo);
+                Console.WriteLine(dirInfo);
             }
 
-            Console.WriteLine("Show Duplicates");
+            //foreach (DirInfo dirInfo in dirMap.Values)
+            //{
+            //    Console.WriteLine(dirInfo);
+            //}
+
+            PrintTitle("Duplicated Names");
+
+            foreach ( IGrouping<string, string> group in dirMap.Values
+                .Select(dirInfo => Path.GetFileName(dirInfo.Name))
+                .GroupBy(name => name)
+                .Where(group => group.Count() > 1) )
+            {
+                Console.WriteLine(group.Key);
+            }
+
+            PrintTitle("Counting Duplicates...");
 
             foreach (HashInfo hashInfo in hashMap.Values.Where(hashInfo => hashInfo.Paths.Count > 1))
             {
-                //Console.WriteLine(hashInfo);
-                //Console.WriteLine("----------------------------------------------------------------------------------------");
-
                 for (int i = 0; i < hashInfo.Paths.Count - 1; i++)
                 {
                     string dir1 = Path.GetDirectoryName(hashInfo.Paths[i]);
@@ -151,9 +177,8 @@ namespace DupFinder
                 }
             }
 
-            Console.WriteLine("--------------------------------------------------------------------------------");
-            Console.WriteLine("Show Directory Dup Counts");
-            Console.WriteLine("--------------------------------------------------------------------------------");
+            PrintTitle("Show Directory Dup Counts");
+
             foreach (DupCounter dupCounter in dupCounterMap.Values)
             {
                 DirInfo dirInfo1 = dirMap[dupCounter.Dir1];
@@ -161,7 +186,7 @@ namespace DupFinder
                 Console.WriteLine(dirInfo1);
                 Console.WriteLine(dirInfo2);
                 Console.WriteLine($"duplicate: {dupCounter.Count}");
-                Console.WriteLine("--------------------------------------------------------------------------------");
+                br();
             }
         }
 

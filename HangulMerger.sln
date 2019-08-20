@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUtils", "FileUtils\File
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BulkHash", "BulkHash\BulkHash.csproj", "{93949B10-D7BF-4DD1-8EB8-FA7582CA33C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryFlatter", "DirectoryFlatter\DirectoryFlatter.csproj", "{1141F099-DAF5-4A87-B86F-6912D9B636AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{93949B10-D7BF-4DD1-8EB8-FA7582CA33C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93949B10-D7BF-4DD1-8EB8-FA7582CA33C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93949B10-D7BF-4DD1-8EB8-FA7582CA33C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1141F099-DAF5-4A87-B86F-6912D9B636AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1141F099-DAF5-4A87-B86F-6912D9B636AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1141F099-DAF5-4A87-B86F-6912D9B636AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1141F099-DAF5-4A87-B86F-6912D9B636AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

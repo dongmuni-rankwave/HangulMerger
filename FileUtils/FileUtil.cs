@@ -26,11 +26,29 @@ namespace FileUtils
             ".gif", ".jpeg", ".jpg", ".png", ".webp"
         });
 
-        public static bool IsImage(string path)
+        static HashSet<string> VIDEO_EXTS = new HashSet<string>(new string[] {
+            ".avi", ".mkv", ".mov", ".mp4",
+        });
+
+        public static bool ContainsExt(string path, HashSet<string> hashSet)
         {
             string ext = Path.GetExtension(path);
-            return ext != null && IMAGE_EXTS.Contains(ext.ToLower());
+            return ext != null && hashSet.Contains(ext.ToLower());
         }
 
+        public static bool IsImage(string path)
+        {
+            return ContainsExt(path, IMAGE_EXTS);
+        }
+
+        public static bool IsVideo(string path)
+        {
+            return ContainsExt(path, VIDEO_EXTS);
+        }
+
+        public static bool IsMultimedia(string path)
+        {
+            return IsImage(path) || IsVideo(path);
+        }
     }
 }
